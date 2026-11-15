@@ -1,19 +1,22 @@
 package org.example.service;
 
+import org.example.model.OrderRegisteredEvent;
 import org.example.model.OrderRequest;
 import org.example.model.OrderResponse;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class OrderServiceImpl implements OrderService {
     private final List<OrderResponse> registeredOrders = new ArrayList<>();
     private long nextId = 1005L;
 
-//    @Autowired
-//    OrderRepository repository;
+    @Autowired
+    private OrderEventPublisher publisher;
 
     @Override
     public synchronized List<OrderResponse> getOrders() {
@@ -82,6 +85,10 @@ public class OrderServiceImpl implements OrderService {
         order.setId(nextId++);
         order.setProducts(products);
         registeredOrders.add(order);
+
+        OrderRegisteredEvent event = OrderRegisteredEvent.create(UUID.randomUUID().toString(), "test_"+UUID.randomUUID()+"_dom@mail.com");
+        publisher.publish(event);
+
         return true;
     }
 }
